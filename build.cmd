@@ -16,3 +16,4 @@ if exist publish rd /s /q publish
 dotnet build "NETStandard2.0/Afx.Base/Afx.Base.csproj" -c Release 
 cd publish
 del /q/s *.pdb
+pause

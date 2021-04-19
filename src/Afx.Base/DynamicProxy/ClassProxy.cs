@@ -260,11 +260,11 @@ namespace Afx.DynamicProxy
             //方法
             var methods = this.GetAllMethod(targetType);
             //public hidebysig newslot virtual final
-            MethodAttributes newMethodAttr = MethodAttributes.Public | MethodAttributes.Final | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
+            MethodAttributes newMethodAttr = MethodAttributes.Public | MethodAttributes.Virtual | MethodAttributes.HideBySig | MethodAttributes.NewSlot;
             foreach (var baseMethod in methods)
             {
                 var intefacemethlist = this.GetOverrideMethods(baseMethod, interfaceTypes);
-                if (!baseMethod.IsVirtual && intefacemethlist.Count == 0)
+                if (!baseMethod.IsVirtual && intefacemethlist.Count == 0 || baseMethod.IsFinal)
                 {
                     continue;
                 }

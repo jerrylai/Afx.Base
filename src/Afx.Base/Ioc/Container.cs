@@ -367,6 +367,7 @@ namespace Afx.Ioc
             if((result == null || serviceType.IsInterface) && objectContext.EnabledAop)
             {
                 if(result == null && objectContext.Mode == CreateMode.None)
+                
                 {
                     result = this.proxyGenerator.GetClassProxy(objectContext.TargetInfo.TargetType, args,
                         true, objectContext.AopTypeList?.ToArray());

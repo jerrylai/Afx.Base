@@ -121,7 +121,8 @@ namespace Afx.Ioc
                 switch(this.Context.Mode)
                 {
                     case CreateMode.None:
-                        container.proxyGenerator.RegisterClassProxy(this.Context.TargetInfo.TargetType);
+                        if (!this.Context.TargetInfo.TargetType.IsGenericTypeDefinition)
+                            container.proxyGenerator.RegisterClassProxy(this.Context.TargetInfo.TargetType);
                         break;
                     case CreateMode.Instance:
                     case CreateMode.Method:

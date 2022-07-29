@@ -39,17 +39,17 @@ namespace Afx.Utils
             {
                 try
                 {
-                    using (MD5CryptoServiceProvider md5 = new MD5CryptoServiceProvider())
+                    using (MD5 md5 = MD5.Create())
                     {
                         result = md5.ComputeHash(input);
                     }
                 }
-                catch (Exception ex)
+                catch
                 {
 #if !NETCOREAPP && !NETSTANDARD
                     SetFipsAlgorithmPolicy();
 #endif
-                    throw ex;
+                    throw;
                 }
             }
             else

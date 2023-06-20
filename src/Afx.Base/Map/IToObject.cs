@@ -15,5 +15,12 @@ namespace Afx.Map
         /// <param name="o"></param>
         /// <returns></returns>
         object To(object fromObj);
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromObj"></param>
+        /// <param name="setObj"></param>
+        void Set(object fromObj, object setObj);
     }
 }

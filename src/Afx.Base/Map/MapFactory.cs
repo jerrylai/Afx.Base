@@ -7,6 +7,7 @@ using System.Threading;
 
 using Afx.Threading;
 using Afx.Collections;
+using System.Data;
 
 namespace Afx.Map
 {
@@ -95,14 +96,14 @@ namespace Afx.Map
                 var toObjectBaseType = typeof(object);
                 var typeBuilder = this.m_moduleBuilder.DefineType(this.GetDynamicName(key), toObjectBaseType.Attributes, toObjectBaseType, new Type[] { typeof(IToObject) });
 
-#region ctor
+                #region ctor
                 var baseCtor = toObjectBaseType.GetConstructor(Type.EmptyTypes);
                 ConstructorBuilder ctor = typeBuilder.DefineConstructor(baseCtor.Attributes, baseCtor.CallingConvention, Type.EmptyTypes);
                 ILGenerator ctorIL = ctor.GetILGenerator();
                 ctorIL.Emit(OpCodes.Ldarg_0);
                 ctorIL.Emit(OpCodes.Call, baseCtor);
                 ctorIL.Emit(OpCodes.Ret);
-#endregion
+                #endregion
 
                 var fromProperties = new List<PropertyInfo>(key.FromType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty));
                 var toProperties = new List<PropertyInfo>(key.ToType.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.GetProperty | BindingFlags.SetProperty));
@@ -151,7 +152,39 @@ namespace Afx.Map
 
                 il.Emit(OpCodes.Ldloc, resultLocal);
                 il.Emit(OpCodes.Ret);
-                #endregion to2MethodBuilder end
+                #endregion
+
+                #region Set(object fromObj, object setObj)
+                MethodAttributes setmethattr = MethodAttributes.FamANDAssem | MethodAttributes.Family | MethodAttributes.Virtual | MethodAttributes.HideBySig;
+                MethodBuilder setMethodBuilder = typeBuilder.DefineMethod("Set", setmethattr, CallingConventions.Standard, typeof(void), new Type[] { typeof(object), typeof(object) });
+
+                ILGenerator setil = setMethodBuilder.GetILGenerator();
+                var setfromLocal = setil.DeclareLocal(key.FromType);
+                var settoLocal = setil.DeclareLocal(key.ToType);
+
+                setil.Emit(OpCodes.Ldarg_1);
+                setil.Emit(OpCodes.Castclass, key.FromType);
+                setil.Emit(OpCodes.Stloc, setfromLocal);
+
+                setil.Emit(OpCodes.Ldarg_2);
+                setil.Emit(OpCodes.Castclass, key.ToType);
+                setil.Emit(OpCodes.Stloc, settoLocal);
+
+                foreach (var fp in fromProperties)
+                {
+                    var tp = toProperties.Find(q => q.Name == fp.Name && q.PropertyType == fp.PropertyType);
+                    if (tp != null)
+                    {
+                        setil.Emit(OpCodes.Ldloc, settoLocal);
+                        setil.Emit(OpCodes.Ldloc, setfromLocal);
+
+                        setil.Emit(OpCodes.Callvirt, fp.GetGetMethod());
+                        setil.Emit(OpCodes.Callvirt, tp.GetSetMethod());
+                    }
+                }
+                setil.Emit(OpCodes.Ret);
+                #endregion
+
 #if NETSTANDARD
                 toObjectType = typeBuilder.CreateTypeInfo();
 #else
@@ -285,6 +318,25 @@ namespace Afx.Map
             }
 
             return result;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="fromObj"></param>
+        /// <param name="setObj"></param>
+        public void Set<F,T>(F fromObj, T setObj)
+        {
+            if (fromObj == null || setObj == null) return;
+            var ft = typeof(F);
+            var st = typeof(T);
+            if (!ft.IsClass || !st.IsClass || ft.IsInterface || st.IsInterface) return;
+            var toObject = this.GetToObject(new TypeKey() { FromType = ft, ToType = st });
+            if (toObject != null)
+            {
+                try {  toObject.Set(fromObj, setObj); }
+                catch { }
+            }
         }
     }
 }

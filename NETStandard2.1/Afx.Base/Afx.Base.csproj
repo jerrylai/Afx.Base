@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <RootNamespace>Afx.Base</RootNamespace>
-    <Version>10.6.1</Version>
+    <Version>10.7.0</Version>
     <PackageTags>Afx.Base AOP IOC MAP Utils Afx</PackageTags>
     <Authors>jerrylai@aliyun.com</Authors>
     <Description>Afx.Base AOP IOC MAP Utils</Description>
@@ -59,6 +59,7 @@
     <Compile Include="..\..\src\Afx.Base\IO\FindByteStream.cs" Link="IO\FindByteStream.cs" />
     <Compile Include="..\..\src\Afx.Base\IO\FindStream.cs" Link="IO\FindStream.cs" />
     <Compile Include="..\..\src\Afx.Base\Threading\ReadWriteLock.cs" Link="Threading\ReadWriteLock.cs" />
+    <Compile Include="..\..\src\Afx.Base\Utils\AesUtils.cs" Link="Utils\AesUtils.cs" />
     <Compile Include="..\..\src\Afx.Base\Utils\DesUtils.cs" Link="Utils\DesUtils.cs" />
     <Compile Include="..\..\src\Afx.Base\Utils\RsaUtils.cs" Link="Utils\RsaUtils.cs" />
     <Compile Include="..\..\src\Afx.Base\Utils\TripleDesUtils.cs" Link="Utils\TripleDesUtils.cs" />

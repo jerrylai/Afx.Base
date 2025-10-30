@@ -107,6 +107,9 @@
     <Compile Include="..\..\src\Afx.Base\Ioc\TargetContext.cs">
       <Link>Ioc\TargetContext.cs</Link>
     </Compile>
+    <Compile Include="..\..\src\Afx.Base\Utils\AesUtils.cs">
+      <Link>Utils\AesUtils.cs</Link>
+    </Compile>
     <Compile Include="..\..\src\Afx.Base\Utils\EnumUtils.cs">
       <Link>Utils\EnumUtils.cs</Link>
     </Compile>

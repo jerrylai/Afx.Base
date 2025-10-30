@@ -231,7 +231,7 @@ namespace Afx.Utils
         /// <param name="type"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        public static string Sign(string data, string privateKey, RsaType type = RsaType.RSA, Encoding encoding = null)
+        public static string Sign(string data, string privateKey, RsaType type = RsaType.RSA, Encoding encoding = null, StringByteType resultType = StringByteType.Base64)
         {
             if (string.IsNullOrEmpty(data)) throw new ArgumentNullException(nameof(data));
             if (string.IsNullOrEmpty(privateKey)) throw new ArgumentNullException(nameof(privateKey));
@@ -252,7 +252,7 @@ namespace Afx.Utils
                 var hashAlgorithmName = type == RsaType.RSA ? "SHA1" : "SHA256";
                 var signatureBytes = rsa.SignData(dataBytes, hashAlgorithmName);
 #endif
-                var result = Convert.ToBase64String(signatureBytes);
+                var result = resultType == StringByteType.Base64 ? Convert.ToBase64String(signatureBytes) : StringUtils.ByteToHexString(signatureBytes);
 
                 return result;
             }
@@ -266,14 +266,14 @@ namespace Afx.Utils
         /// <param name="type"></param>
         /// <param name="encoding"></param>
         /// <returns></returns>
-        public static bool VerifyData(string data, string sign, string publicKey, RsaType type = RsaType.RSA, Encoding encoding = null)
+        public static bool VerifyData(string data, string sign, string publicKey, RsaType type = RsaType.RSA, Encoding encoding = null, StringByteType signType = StringByteType.Base64)
         {
             if (string.IsNullOrEmpty(data)) throw new ArgumentNullException(nameof(data));
             if (string.IsNullOrEmpty(sign)) throw new ArgumentNullException(nameof(sign));
             if (string.IsNullOrEmpty(publicKey)) throw new ArgumentNullException(nameof(publicKey));
             if (encoding == null) encoding = Encoding.UTF8;
             byte[] dataBytes = encoding.GetBytes(data);
-            byte[] signBytes = Convert.FromBase64String(sign);
+            byte[] signBytes = signType == StringByteType.Base64 ? Convert.FromBase64String(sign) : StringUtils.HexStringToByte(sign);
 #if netstandard
             using (var rsa = RSA.Create())
 #else

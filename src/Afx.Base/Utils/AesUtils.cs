@@ -6,9 +6,9 @@ using System.Text;
 namespace Afx.Utils
 {
     /// <summary>
-    /// DES 加密、解密
+    /// AES 加密、解密
     /// </summary>
-    public static class DesUtils
+    public static class AesUtils
     {
         /// <summary>
         /// 加密、解密默认 key
@@ -24,20 +24,20 @@ namespace Afx.Utils
         public const PaddingMode DefaultPadding = PaddingMode.PKCS7;
 
         /// <summary>
-        /// 生成 ASCII字符的 des key
+        /// 生成 ASCII字符的 aes key
         /// </summary>
         /// <param name="len"></param>
-        /// <returns>8 个ASCII字符</returns>
-        public static string CreateKey(int len = 8)
+        /// <returns>ASCII字符</returns>
+        public static string CreateKey(int len = 24)
         {
             return StringUtils.GetRandomString(len);
         }
 
         /// <summary>
-        /// 生成 ASCII字符的 des iv
+        /// 生成 ASCII字符的 aes iv
         /// </summary>
         /// <param name="len"></param>
-        /// <returns>8 个ASCII字符</returns>
+        /// <returns>ASCII字符</returns>
         public static string CreateIV(int len = 8)
         {
             return StringUtils.GetRandomString(len);
@@ -117,7 +117,7 @@ namespace Afx.Utils
                     ivBytes = Encoding.ASCII.GetBytes(tiv);
                 }
 
-               output = Encrypt(input, keyBytes, ivBytes, mode, padding);
+                output = Encrypt(input, keyBytes, ivBytes, mode, padding);
 
                 if (string.IsNullOrEmpty(iv))
                 {
@@ -127,7 +127,7 @@ namespace Afx.Utils
                     output = buffer;
                 }
             }
-            else if(input != null && input.Length == 0)
+            else if (input != null && input.Length == 0)
             {
                 output = new byte[0];
             }
@@ -140,7 +140,7 @@ namespace Afx.Utils
         /// </summary>
         /// <param name="input">byte[]</param>
         /// <param name="key">key</param>
-        /// <param name="iv">iv</param>
+        /// <param name="iv"> iv</param>
         /// <param name="mode">指定用于加密的块密码模式</param>
         /// <param name="padding">指定在消息数据块比加密操作所需的全部字节数短时应用的填充类型</param>
         /// <returns>加密成功返回byte[]</returns>
@@ -149,15 +149,18 @@ namespace Afx.Utils
             byte[] output = null;
             if (input != null && input.Length > 0)
             {
-                if (key == null || key.Length < 8 || key.Length % 8 != 0) throw new ArgumentException("key");
-                if (iv == null || iv.Length < 8 || iv.Length % 8 != 0) throw new ArgumentException("iv");
-                using (var des = DES.Create())
+                if (key == null) throw new ArgumentNullException("key");
+                if (key.Length < 8 || key.Length % 8 != 0) throw new ArgumentException("key.Length is error!", "key");
+                if (iv.Length < 8 || iv.Length % 8 != 0) throw new ArgumentException("iv.Length is error!", "iv");
+
+                using (var aes = Aes.Create())
                 {
-                    des.Mode = mode;
-                    des.Padding = padding;
-                    des.Key = key;
-                    des.IV = iv;
-                    using (ICryptoTransform cryptoTransform = des.CreateEncryptor())
+                    aes.Mode = mode;
+                    aes.Padding = padding;
+                    aes.Key = key;
+                    aes.IV = iv;
+
+                    using (ICryptoTransform cryptoTransform = aes.CreateEncryptor())
                     {
                         output = cryptoTransform.TransformFinalBlock(input, 0, input.Length);
                     }
@@ -279,14 +282,14 @@ namespace Afx.Utils
                 var len = input.Length;
                 if (0 < input_len && input_len < input.Length) len = input_len;
 
-                using (var des = DES.Create())
+                using (var aes = Aes.Create())
                 {
-                    des.Mode = mode;
-                    des.Padding = padding;
-                    des.Key = key;
-                    des.IV = iv;
+                    aes.Mode = mode;
+                    aes.Padding = padding;
+                    aes.Key = key;
+                    aes.IV = iv;
 
-                    using (ICryptoTransform cryptoTransform = des.CreateDecryptor())
+                    using (ICryptoTransform cryptoTransform = aes.CreateDecryptor())
                     {
                         output = cryptoTransform.TransformFinalBlock(input, 0, len);
                     }
@@ -299,7 +302,6 @@ namespace Afx.Utils
 
             return output;
         }
-
         #endregion
 
         #region string
@@ -465,239 +467,5 @@ namespace Afx.Utils
         }
         #endregion
 
-        #region Stream
-        /// <summary>
-        /// 加密Stream
-        /// </summary>
-        /// <param name="inputStream">要加密Stream</param>
-        /// <param name="outputStream">加密输出Stream</param>
-        /// <returns>是否成功</returns>
-        public static bool Encrypt(Stream inputStream, Stream outputStream)
-        {
-            return Encrypt(inputStream, outputStream, DefaultKey);
-        }
-
-        /// <summary>
-        /// 加密Stream
-        /// </summary>
-        /// <param name="inputStream">要加密Stream</param>
-        /// <param name="outputStream">加密输出Stream</param>
-        /// <param name="key">8 个ASCII字符 key</param>
-        /// <returns>是否成功</returns>
-        public static bool Encrypt(Stream inputStream, Stream outputStream, string key)
-        {
-            return Encrypt(inputStream, outputStream, key, null, DefaultMode, DefaultPadding);
-        }
-
-        /// <summary>
-        /// 加密Stream
-        /// </summary>
-        /// <param name="inputStream">要加密Stream</param>
-        /// <param name="outputStream">加密输出Stream</param>
-        /// <param name="key">8 个ASCII字符 key</param>
-        /// <param name="iv">8 个ASCII字符 iv</param>
-        /// <returns>是否成功</returns>
-        public static bool Encrypt(Stream inputStream, Stream outputStream, string key, string iv)
-        {
-            return Encrypt(inputStream, outputStream, key, iv, DefaultMode, DefaultPadding);
-        }
-
-        /// <summary>
-        /// 加密Stream
-        /// </summary>
-        /// <param name="inputStream">要加密Stream</param>
-        /// <param name="outputStream">加密输出Stream</param>
-        /// <param name="key">8 个ASCII字符 key</param>
-        /// <param name="iv">8 个ASCII字符 iv</param>
-        /// <param name="mode">指定用于加密的块密码模式</param>
-        /// <param name="padding">指定在消息数据块比加密操作所需的全部字节数短时应用的填充类型</param>
-        /// <returns>是否成功</returns>
-        public static bool Encrypt(Stream inputStream, Stream outputStream, string key,
-            CipherMode mode, PaddingMode padding)
-        {
-            return Encrypt(inputStream, outputStream, key, null, mode, padding);
-        }
-
-        /// <summary>
-        /// 加密Stream
-        /// </summary>
-        /// <param name="inputStream">要加密Stream</param>
-        /// <param name="outputStream">加密输出Stream</param>
-        /// <param name="key">ASCII字符 key</param>
-        /// <param name="iv">ASCII字符 iv</param>
-        /// <param name="mode">指定用于加密的块密码模式</param>
-        /// <param name="padding">指定在消息数据块比加密操作所需的全部字节数短时应用的填充类型</param>
-        /// <returns>是否成功</returns>
-        public static bool Encrypt(Stream inputStream, Stream outputStream, string key, string iv,
-            CipherMode mode, PaddingMode padding)
-        {
-            if (inputStream == null) throw new ArgumentNullException("inputStream");
-            if (!inputStream.CanRead) throw new ArgumentException("inputStream is not read!", "inputStream");
-            if (outputStream == null) throw new ArgumentNullException("outputStream");
-            if (!outputStream.CanWrite) throw new ArgumentException("outputStream is not write!", "outputStream");
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
-            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
-            if (keyBytes.Length < 8) throw new ArgumentException("key.Length is error!", "key");
-            byte[] ivBytes = null;
-            if (!string.IsNullOrEmpty(iv))
-            {
-                ivBytes = Encoding.ASCII.GetBytes(iv);
-                if (ivBytes.Length < 8) throw new ArgumentException("iv.Length is error!", "iv");
-            }
-            bool result = false;
-            if (inputStream.Length > 0)
-            {
-                using (var des = DES.Create())
-                {
-                    des.Mode = mode;
-                    des.Padding = padding;
-                    des.Key = keyBytes;
-                    if (ivBytes != null) des.IV = ivBytes;
-                    else des.GenerateIV();
-                    using (var cryptoTransform = des.CreateEncryptor())
-                    {
-                        CryptoStream cryptoStream = new CryptoStream(outputStream, cryptoTransform, CryptoStreamMode.Write);
-                        //using (CryptoStream cryptoStream = new CryptoStream(outputStream, cryptoTransform, CryptoStreamMode.Write))
-                        {
-                            byte[] buffer = new byte[4 * 1024];
-                            do
-                            {
-                                int readlength = buffer.Length;
-                                long _count = inputStream.Length - inputStream.Position;
-                                if (_count < readlength)
-                                    readlength = (int)_count;
-                                int len = inputStream.Read(buffer, 0, readlength);
-                                cryptoStream.Write(buffer, 0, len);
-                            }
-                            while (inputStream.Position < inputStream.Length);
-
-                            cryptoStream.FlushFinalBlock();
-                            if (ivBytes == null) outputStream.Write(des.IV, 0, des.IV.Length);
-                            result = true;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// 解密Stream
-        /// </summary>
-        /// <param name="inputStream">要解密Stream</param>
-        /// <param name="outputStream">解密成功Stream</param>
-        /// <returns>是否成功</returns>
-        public static bool Decrypt(Stream inputStream, Stream outputStream)
-        {
-            return Decrypt(inputStream, outputStream, DefaultKey);
-        }
-
-        /// <summary>
-        /// 解密Stream
-        /// </summary>
-        /// <param name="inputStream">要解密Stream</param>
-        /// <param name="outputStream">解密成功Stream</param>
-        /// <param name="key">8 个ASCII字符 key</param>
-        /// <returns>是否成功</returns>
-        public static bool Decrypt(Stream inputStream, Stream outputStream, string key)
-        {
-            return Decrypt(inputStream, outputStream, key, null, DefaultMode, DefaultPadding);
-        }
-
-        /// <summary>
-        /// 解密Stream
-        /// </summary>
-        /// <param name="inputStream">要解密Stream</param>
-        /// <param name="outputStream">解密成功Stream</param>
-        /// <param name="key">8 个ASCII字符 key</param>
-        /// <param name="iv">8 个ASCII字符 iv</param>
-        /// <returns>是否成功</returns>
-        public static bool Decrypt(Stream inputStream, Stream outputStream, string key, string iv)
-        {
-            return Decrypt(inputStream, outputStream, key, iv, DefaultMode, DefaultPadding);
-        }
-
-        /// <summary>
-        /// 解密Stream
-        /// </summary>
-        /// <param name="inputStream">要解密Stream</param>
-        /// <param name="outputStream">解密成功Stream</param>
-        /// <param name="key">ASCII字符 key</param>
-        /// <param name="iv">ASCII字符 iv</param>
-        /// <param name="mode">指定用于解密的块密码模式</param>
-        /// <param name="padding">指定在消息数据块比解密操作所需的全部字节数短时应用的填充类型</param>
-        /// <returns>是否成功</returns>
-        public static bool Decrypt(Stream inputStream, Stream outputStream, string key, string iv,
-            CipherMode mode, PaddingMode padding)
-        {
-            if (inputStream == null) throw new ArgumentNullException("inputStream");
-            if (!inputStream.CanRead) throw new ArgumentException("inputStream is not read!", "inputStream");
-            if (outputStream == null) throw new ArgumentNullException("outputStream");
-            if (!outputStream.CanWrite) throw new ArgumentException("outputStream is not write!", "outputStream");
-            if (string.IsNullOrEmpty(key)) throw new ArgumentNullException("key");
-            byte[] keyBytes = Encoding.ASCII.GetBytes(key);
-            if (keyBytes.Length < 8) throw new ArgumentException("key.Length is error!", "key");
-            byte[] ivBytes = null;
-            if (!string.IsNullOrEmpty(iv))
-            {
-                ivBytes = Encoding.ASCII.GetBytes(iv);
-                if (ivBytes.Length < 8) throw new ArgumentException("iv.Length is error!", "iv");
-            }
-            else if (0 < inputStream.Length)
-            {
-                if (inputStream.Length <= 8) throw new ArgumentException("inputStream.Length is error!", "inputStream");
-                if (!inputStream.CanSeek) throw new ArgumentException("inputStream is not seek!", "inputStream");
-            }
-            bool result = false;
-
-            if (inputStream.Length > 0)
-            {
-                using (var des = DES.Create())
-                {
-                    des.Mode = mode;
-                    des.Padding = padding;
-                    des.Key = keyBytes;
-                    if (ivBytes != null)
-                    {
-                        des.IV = ivBytes;
-                    }
-                    else
-                    {
-                        var _iv = new byte[8];
-                        inputStream.Seek(inputStream.Length - _iv.Length, SeekOrigin.Begin);
-                        inputStream.Read(_iv, 0, _iv.Length);
-                        inputStream.Seek(0, SeekOrigin.Begin);
-                        des.IV = _iv;
-                    }
-                    using (var cryptoTransform = des.CreateDecryptor())
-                    {
-                        CryptoStream cryptoStream = new CryptoStream(outputStream, cryptoTransform, CryptoStreamMode.Write);
-                        //using (cryptoStream encStream = new CryptoStream(outputStream, cryptoTransform, CryptoStreamMode.Write))
-                        {
-                            long endlength = inputStream.Length;
-                            if (ivBytes == null) endlength = endlength - des.IV.Length;
-                            byte[] buffer = new byte[4 * 1024];
-                            do
-                            {
-                                int readlength = buffer.Length;
-                                long _count = endlength - inputStream.Position;
-                                if (_count < readlength)
-                                    readlength = (int)_count;
-                                int len = inputStream.Read(buffer, 0, readlength);
-                                cryptoStream.Write(buffer, 0, len);
-                            }
-                            while (inputStream.Position < endlength);
-
-                            cryptoStream.FlushFinalBlock();
-                            result = true;
-                        }
-                    }
-                }
-            }
-
-            return result;
-        }
-        #endregion
     }
 }

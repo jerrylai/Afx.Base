@@ -310,7 +310,7 @@ namespace Afx.Utils
         /// <param name="input"></param>
         /// <param name="publicKey"></param>
         /// <returns></returns>
-        public static byte[] Encrypt(byte[] input, string publicKey)
+        public static byte[] Encrypt(byte[] input, string publicKey, bool fOAEP = false)
         {
             if (input == null || input.Length == 0) throw new ArgumentNullException(nameof(input));
             if (string.IsNullOrEmpty(publicKey)) throw new ArgumentNullException(nameof(publicKey));
@@ -329,7 +329,7 @@ namespace Afx.Utils
                 int maxBlockSize = rsa.KeySize / 8 - 11; //加密块最大长度限制
                 if (input.Length <= maxBlockSize)
                 {
-                    var buffer = rsa.Encrypt(input, false);
+                    var buffer = rsa.Encrypt(input, fOAEP);
                     return buffer;
                 }
                 else
@@ -344,7 +344,7 @@ namespace Afx.Utils
                             {
                                 Byte[] toEncrypt = new Byte[blockSize];
                                 Array.Copy(buffer, 0, toEncrypt, 0, blockSize);
-                                Byte[] cryptograph = rsa.Encrypt(toEncrypt, false);
+                                Byte[] cryptograph = rsa.Encrypt(toEncrypt, fOAEP);
                                 crypStream.Write(cryptograph, 0, cryptograph.Length);
                                 blockSize = plaiStream.Read(buffer, 0, maxBlockSize);
                             }
@@ -363,7 +363,7 @@ namespace Afx.Utils
         /// <param name="input"></param>
         /// <param name="privateKey"></param>
         /// <returns></returns>
-        public static byte[] Decrypt(byte[] input, string privateKey)
+        public static byte[] Decrypt(byte[] input, string privateKey, bool fOAEP = false)
         {
             if (input == null || input.Length == 0) throw new ArgumentNullException(nameof(input));
             if (string.IsNullOrEmpty(privateKey)) throw new ArgumentNullException(nameof(privateKey));
@@ -383,7 +383,7 @@ namespace Afx.Utils
                 int maxBlockSize = rsa.KeySize / 8; //解密块最大长度限制
                 if (input.Length <= maxBlockSize)
                 {
-                    byte[] buffer = rsa.Decrypt(input, false);
+                    byte[] buffer = rsa.Decrypt(input, fOAEP);
                     return buffer;
                 }
                 else
@@ -398,7 +398,7 @@ namespace Afx.Utils
                             {
                                 Byte[] toDecrypt = new Byte[blockSize];
                                 Array.Copy(buffer, 0, toDecrypt, 0, blockSize);
-                                Byte[] cryptograph = rsa.Decrypt(toDecrypt, false);
+                                Byte[] cryptograph = rsa.Decrypt(toDecrypt, fOAEP);
                                 plaiStream.Write(cryptograph, 0, cryptograph.Length);
                                 blockSize = crypStream.Read(buffer, 0, maxBlockSize);
                             }
@@ -417,11 +417,11 @@ namespace Afx.Utils
         /// <param name="publicKey"></param>
         /// <param name="resultType"></param>
         /// <returns></returns>
-        public static string Encrypt(string input, string publicKey, StringByteType resultType = StringByteType.Hex)
+        public static string Encrypt(string input, string publicKey, StringByteType resultType = StringByteType.Hex, bool fOAEP = false)
         {
             if (string.IsNullOrEmpty(input)) throw new ArgumentNullException(nameof(input));
             var arr = Encoding.UTF8.GetBytes(input);
-            var buffer = Encrypt(arr, publicKey);
+            var buffer = Encrypt(arr, publicKey, fOAEP);
             var result = resultType == StringByteType.Hex ? Afx.Utils.StringUtils.ByteToHexString(buffer)
                 : Convert.ToBase64String(buffer);
 
@@ -434,12 +434,12 @@ namespace Afx.Utils
         /// <param name="privateKey"></param>
         /// <param name="inputType"></param>
         /// <returns></returns>
-        public static string Decrypt(string input, string privateKey, StringByteType inputType = StringByteType.Hex)
+        public static string Decrypt(string input, string privateKey, StringByteType inputType = StringByteType.Hex, bool fOAEP = false)
         {
             if (string.IsNullOrEmpty(input)) throw new ArgumentNullException(nameof(input));
             var arr = inputType == StringByteType.Hex ? Afx.Utils.StringUtils.HexStringToByte(input)
                 : Convert.FromBase64String(input);
-            var buffer = Decrypt(arr, privateKey);
+            var buffer = Decrypt(arr, privateKey, fOAEP);
             var result = Encoding.UTF8.GetString(buffer);
 
             return result;

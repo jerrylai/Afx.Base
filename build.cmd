@@ -8,6 +8,8 @@ if exist publish rd /s /q publish
 dotnet build "NETStandard2.0/Afx.Base/Afx.Base.csproj" -c Release
 dotnet build "NETStandard2.1/Afx.Base/Afx.Base.csproj" -c Release
 dotnet build "NET6.0/Afx.Base/Afx.Base.csproj" -c Release
+dotnet build "NET8.0/Afx.Base/Afx.Base.csproj" -c Release
+dotnet build "NET9.0/Afx.Base/Afx.Base.csproj" -c Release
 cd publish
 del /q/s *.pdb
 pause

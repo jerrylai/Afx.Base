@@ -188,7 +188,7 @@ namespace Afx.IO
                 long len = index - posistion;
                 arr = new byte[len];
                 this.stream.Seek(posistion, SeekOrigin.Begin);
-                this.stream.Read(arr, 0, arr.Length);
+               int c = this.stream.Read(arr, 0, arr.Length);
                 this.stream.Seek(key.Length, SeekOrigin.Begin);
             }
 
@@ -261,7 +261,7 @@ namespace Afx.IO
             {
                 long len = this.Length - this.Position;
                 buffer = new byte[len];
-                this.stream.Read(buffer, 0, buffer.Length);
+                int c = this.stream.Read(buffer, 0, buffer.Length);
             }
 
             return buffer;

@@ -1,3 +1,3 @@
 @echo off
-set v=10.7.1
+set v=10.8.0
 tool\EditVersion dir="%cd%" v=%v% a="Assembly.cs"

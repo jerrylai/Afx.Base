@@ -666,7 +666,7 @@ namespace Afx.Utils
                     {
                         var _iv = new byte[8];
                         inputStream.Seek(inputStream.Length - _iv.Length, SeekOrigin.Begin);
-                        inputStream.Read(_iv, 0, _iv.Length);
+                        int c = inputStream.Read(_iv, 0, _iv.Length);
                         inputStream.Seek(0, SeekOrigin.Begin);
                         des.IV = _iv;
                     }

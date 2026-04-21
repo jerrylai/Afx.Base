@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <RootNamespace>Afx.Base</RootNamespace>
-    <Version>10.8.0</Version>
+    <Version>10.8.1</Version>
     <PackageTags>Afx.Base AOP IOC MAP Utils Afx</PackageTags>
     <Authors>jerrylai@aliyun.com</Authors>
     <Description>Afx.Base AOP IOC MAP Utils</Description>
@@ -20,7 +20,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <OutputPath>..\..\publish\</OutputPath>
-    <DocumentationFile>..\..\publish\net6.0\Afx.Base.xml</DocumentationFile>
+    <DocumentationFile>..\..\publish\net9.0\Afx.Base.xml</DocumentationFile>
     <DefineConstants>TRACE</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
